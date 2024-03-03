@@ -12,6 +12,17 @@
 #define ROOT_INDEX 1
 #define NOTHING -1
 
+// prototypes
+int leftIdx(MinHeap* heap, int nodeIndex);
+int rightIdx(MinHeap* heap, int nodeIndex);
+int parentIdx(MinHeap* heap, int nodeIndex);
+bool isValidIndex(MinHeap* heap, int maybeIdx);
+HeapNode nodeAt(MinHeap* heap, int nodeIndex);
+int priorityAt(MinHeap* heap, int nodeIndex);
+int idAt(MinHeap* heap, int nodeIndex);
+int indexOf(MinHeap* heap, int id);
+
+
 /*************************************************************************
  ** Suggested helper functions -- to help designing your code
  *************************************************************************/
@@ -22,6 +33,7 @@
  */
 void swap(MinHeap* heap, int index1, int index2){
        if (isValidIndex(heap,index1) && isValidIndex(heap,index2)){
+              
               int priorityIndex1 = priorityAt(heap,index1);
               int idIndex1 = idAt(heap,index1);
               int priorityIndex2 = priorityAt(heap,index2);
@@ -31,10 +43,11 @@ void swap(MinHeap* heap, int index1, int index2){
               heap->arr[index1].id = idIndex2;
 
               heap->arr[index2].priority = priorityIndex1;
-              heap->arr[index2].id = priorityIndex1;
+              heap->arr[index2].id = idIndex1;
 
               heap->indexMap[idIndex1] = index2;
               heap->indexMap[idIndex2] = index1;
+              printf("Swap successfully\n");
 
        }
 }
@@ -47,16 +60,19 @@ void bubbleUp(MinHeap* heap, int nodeIndex){
        if (isValidIndex(heap,nodeIndex)){
               int nodeId = idAt(heap,nodeIndex);    // stay constant
               int nodePriority = priorityAt(heap,nodeIndex); // stay constant
-
               int parentIndex = parentIdx(heap,nodeIndex); // need to update
               int parentPriority = priorityAt(heap,parentIndex); // need to update
-
+              //printf("nodeIndex is %d ,", nodeIndex);
+              //printf("parentIndex is %d, parentP is %d and nodeP is %d\n", parentIndex,parentPriority,nodePriority);
               while(parentIndex != NOTHING && parentPriority > nodePriority){
+                     //printf("ready to bubble up\n");
                      swap(heap,parentIndex,nodeIndex);
-                     nodeIndex = indexOf(heap,nodeId);
+                     //printf("One swap of Bubble up is done\n");
+                     nodeIndex = parentIndex;
                      parentIndex =  parentIdx(heap,nodeIndex);
                      parentPriority = priorityAt(heap,parentIndex);
               }
+              printf("while loop done\n");
 
        }
 }
@@ -66,42 +82,61 @@ void bubbleUp(MinHeap* heap, int nodeIndex){
  */
 void bubbleDown(MinHeap* heap){
        int root = ROOT_INDEX;
-       if (heap->size > 1){
-              int rootId = idAt(heap,root);
-              int rootPriority = priorityAt(heap,root);
+       
+       int rootId = idAt(heap,root);
+       int rootPriority = priorityAt(heap,root);
 
-              int leftIndex = leftIdx(heap,root);
+       int leftIndex = leftIdx(heap,root);
 
-              int rightIndex = rightIdx(heap,root);
+       int rightIndex = rightIdx(heap,root);
 
-              while (leftIndex != NOTHING){
-                     int leftId = idAt(heap,leftIndex);
-                     int leftPriority = priorityAt(heap,leftIndex);
+       while (leftIndex != NOTHING){
+              int leftId = idAt(heap,leftIndex);
+              int leftPriority = priorityAt(heap,leftIndex);
 
-                     if (rightIndex != NOTHING){
-                            int rightId = idAt(heap,rightIndex);
-                            int rightPriority = priorityAt(heap,rightIndex);
+              if (rightIndex != NOTHING){
+                     int rightId = idAt(heap,rightIndex);
+                     int rightPriority = priorityAt(heap,rightIndex);
 
-                            if (rootPriority > leftPriority && leftPriority < rightPriority){
-                                   swap(heap,root,leftIndex);
-                            }
-                            else if(rootPriority > rightPriority && rightPriority < leftPriority){
+                     if (rootPriority>leftPriority && rootPriority>rightPriority){
+                            if(leftPriority>rightPriority){
                                    swap(heap,root,rightIndex);
                             }
-
-                     }
-
-                     else if (rightIndex == NOTHING){
-                            if(rootPriority > leftPriority){
+                            else if(leftPriority<rightPriority){
                                    swap(heap,root,leftIndex);
                             }
                      }
 
-                      root = indexOf(heap,rootId);
-                      int leftIndex = leftIdx(heap,root);
+                     else if (rootPriority>leftPriority && rootPriority<rightPriority){
+                            swap(heap,root,leftIndex);
+                     }
+
+
+                     else if (rootPriority<leftPriority && rootPriority>rightPriority){
+                            swap(heap,root,rightIndex);
+                     }
+
+                     else{
+                            break;
+                     }
 
               }
+
+              else if (rightIndex == NOTHING){
+                     if(rootPriority > leftPriority){
+                            swap(heap,root,leftIndex);
+                     }
+                     else{
+                            break;
+                     }
+              }
+
+              root = indexOf(heap,rootId);
+              int leftIndex = leftIdx(heap,root);
+              int rightindex = rightIdx(heap,root);
+              
        }
+       printf("while loop done\n");
 }
 
 /* Returns the index of the left child of a node at index 'nodeIndex' in
@@ -123,7 +158,7 @@ int leftIdx(MinHeap* heap, int nodeIndex){
  * child.
  */
 int rightIdx(MinHeap* heap, int nodeIndex){
-       if (nodeIndex*2+1 <= heap->size){
+       if ((nodeIndex*2+1) <= heap->size){
               return nodeIndex*2+1;
        }
        else{
@@ -131,11 +166,12 @@ int rightIdx(MinHeap* heap, int nodeIndex){
        }
 }
 
-/* Returns the index of the parent of a node at index 'nodeIndex' in minheap
+/* Returns the index of the parent of a node at index 'nodeIndex' in
+ minheap
  * 'heap', if such exists.  Returns NOTHING if there is no such parent.
  */
 int parentIdx(MinHeap* heap, int nodeIndex){
-       if (nodeIndex = 1 || (heap->size) < 2){
+       if (nodeIndex == 1){
               return NOTHING;
        }
        else{
@@ -148,12 +184,8 @@ int parentIdx(MinHeap* heap, int nodeIndex){
  * stores an element at that index. Returns False otherwise.
  */
 bool isValidIndex(MinHeap* heap, int maybeIdx){
-       if (maybeIdx <= heap->size){
-              return true;
-       }
-       else{
-              return false;
-       }
+       return (maybeIdx <= heap->size);
+
 }
 
 /* Returns node at index 'nodeIndex' in minheap 'heap'.
@@ -185,12 +217,12 @@ int idAt(MinHeap* heap, int nodeIndex){
  *               'heap' is non-empty
  */
 int indexOf(MinHeap* heap, int id){
-       for (int index = ROOT_INDEX; index <= heap->size; index++){
-              if (idAt(heap,index) == id){
-                     return index;
-              }
-       }
-       // return heap->indexMap[id];
+    //   for (int index = ROOT_INDEX; index <= heap->size; index++){
+    //          if (idAt(heap,index) == id){
+    //                return index;
+    //          }
+    //   }
+       return heap->indexMap[id];
 }
 
 /*********************************************************************
@@ -219,19 +251,26 @@ HeapNode getMin(MinHeap* heap){
  * Precondition: heap is non-empty
  */
 HeapNode extractMin(MinHeap* heap){
-       HeapNode minNode = getMin(heap);
+       HeapNode minNode =  getMin(heap);
        int minId = minNode.id;
        int lastNodeId = idAt(heap,heap->size);
        int lastNodePriority = priorityAt(heap,heap->size);
 
-       minNode.id = lastNodeId;
-       minNode.priority = lastNodePriority;
+       heap->arr[ROOT_INDEX].id = lastNodeId;
+       printf("change the id of the minNode\n");
+       heap->arr[ROOT_INDEX].priority = lastNodePriority;
+       printf("change the priority of the minNode\n");
+
+       heap->arr[heap->size].priority = NOTHING;
+       heap->arr[heap->size].id = NOTHING;
 
        heap->size = heap->size - 1;
        heap->indexMap[minId] = NOTHING;
        heap->indexMap[lastNodeId] = ROOT_INDEX;
 
+       printf("reset arr and indexMap\n");
        bubbleDown(heap);
+       printf("Bubble Down Finishied\n");
        return minNode;
 
 }
@@ -242,14 +281,16 @@ HeapNode extractMin(MinHeap* heap){
  *               heap->size < heap->capacity
  */
 void insert(MinHeap* heap, int priority, int id){
-       int newIndex = heap->size + 1;
-       // HeapNode *newNode = malloc(sizeof(HeapNode));
-       HeapNode *newNode = &(heap->arr[newIndex]);
-       newNode->id = id;
-       newNode->priority = priority;
-       heap->indexMap[id] = newIndex;
        heap->size = heap->size + 1;
+       printf("size has been updated to %d\n", heap->size);
+       int newIndex = heap->size;
+       heap->arr[newIndex].priority = priority;
+       printf("New heapnode assigned prioirty: %d\n", priority);
+       heap->arr[newIndex].id = id;
+
+       heap->indexMap[id] = newIndex;
        bubbleUp(heap,newIndex);
+       printf("Bubble up finished\n");
 }
 
 /* Returns priority of the node with ID 'id' in 'heap'.
@@ -282,29 +323,6 @@ bool decreasePriority(MinHeap* heap, int id, int newPriority){
        return false;
 }
 
-/* Prints the contents of this heap, including size, capacity, full index
- * map, and, for each non-empty element of the heap array, that node's ID and
- * priority. */
-void printHeap(MinHeap* heap){
-       int size = heap->size;
-       int capacity = heap->capacity;
-       int *indexMap = heap->indexMap;
-       HeapNode *arr = heap->arr;
-       printf("Heap Information\n");
-       printf("This heap has a size of %d\n", size);
-       printf("The capacity is %d\n", capacity);
-       printf("The indexMap: ");
-       for (int i=0; i<capacity; i++){ // print full index map including some id is currently not in heap
-              printf("%d ", indexMap[i]);
-       }
-       printf("\n");
-       for (int j=1; j<=size; j++){ // print each HeapNode info in arr
-              printf("The node on index %d has Priority %d and ID %d\n",j,priorityAt(heap,j),idAt(heap,j));
-       }
-
-
-}
-
 /* Returns a newly created empty minheap with initial capacity 'capacity'.
  * Precondition: capacity >= 0
  */
@@ -312,15 +330,17 @@ MinHeap* newHeap(int capacity){
        MinHeap *newHeap = malloc(sizeof(MinHeap));
        newHeap->size = 0;
        newHeap->capacity = capacity;
-       int *indexMap = malloc(capacity*sizeof(int));
-       for (int i=0; i<capacity; i++){
+       int *indexMap = malloc((capacity+1)*sizeof(int));
+       for (int i=0; i<=capacity; i++){
               indexMap[i] = NOTHING;
        }
-       HeapNode *arr = malloc(capacity*sizeof(HeapNode));
-       for (int i=0; i<capacity; i++){
+       HeapNode *arr = malloc((capacity+1)*sizeof(HeapNode));
+       for (int i=0; i<=capacity; i++){
               arr[i].id = NOTHING;
               arr[i].priority = NOTHING; 
        }
+       newHeap->indexMap = indexMap;
+       newHeap->arr = arr;
        return newHeap;
 }
 
