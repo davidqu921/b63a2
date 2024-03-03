@@ -133,10 +133,10 @@ void bubbleDown(MinHeap* heap){
 
               root = indexOf(heap,rootId);
               int leftIndex = leftIdx(heap,root);
-              int rightindex = rightIdx(heap,root);
+              int rightIndex = rightIdx(heap,root);
               
        }
-       printf("while loop done\n");
+       printf("Bubble down while loop done\n");
 }
 
 /* Returns the index of the left child of a node at index 'nodeIndex' in
@@ -268,7 +268,7 @@ HeapNode extractMin(MinHeap* heap){
        heap->indexMap[minId] = NOTHING;
        heap->indexMap[lastNodeId] = ROOT_INDEX;
 
-       printf("reset arr and indexMap\n");
+       printf("Reset arr and indexMap\n");
        bubbleDown(heap);
        printf("Bubble Down Finishied\n");
        return minNode;
