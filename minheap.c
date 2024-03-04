@@ -47,8 +47,6 @@ void swap(MinHeap* heap, int index1, int index2){
 
               heap->indexMap[idIndex1] = index2;
               heap->indexMap[idIndex2] = index1;
-              printf("Swap successfully\n");
-
        }
 }
 
@@ -72,7 +70,6 @@ void bubbleUp(MinHeap* heap, int nodeIndex){
                      parentIndex =  parentIdx(heap,nodeIndex);
                      parentPriority = priorityAt(heap,parentIndex);
               }
-              printf("while loop done\n");
 
        }
 }
@@ -132,11 +129,10 @@ void bubbleDown(MinHeap* heap){
               }
 
               root = indexOf(heap,rootId);
-              int leftIndex = leftIdx(heap,root);
-              int rightIndex = rightIdx(heap,root);
+              leftIndex = leftIdx(heap,root);
+              rightIndex = rightIdx(heap,root);
               
        }
-       printf("Bubble down while loop done\n");
 }
 
 /* Returns the index of the left child of a node at index 'nodeIndex' in
@@ -257,9 +253,7 @@ HeapNode extractMin(MinHeap* heap){
        int lastNodePriority = priorityAt(heap,heap->size);
 
        heap->arr[ROOT_INDEX].id = lastNodeId;
-       printf("change the id of the minNode\n");
        heap->arr[ROOT_INDEX].priority = lastNodePriority;
-       printf("change the priority of the minNode\n");
 
        heap->arr[heap->size].priority = NOTHING;
        heap->arr[heap->size].id = NOTHING;
@@ -268,9 +262,7 @@ HeapNode extractMin(MinHeap* heap){
        heap->indexMap[minId] = NOTHING;
        heap->indexMap[lastNodeId] = ROOT_INDEX;
 
-       printf("Reset arr and indexMap\n");
        bubbleDown(heap);
-       printf("Bubble Down Finishied\n");
        return minNode;
 
 }
@@ -282,22 +274,21 @@ HeapNode extractMin(MinHeap* heap){
  */
 void insert(MinHeap* heap, int priority, int id){
        heap->size = heap->size + 1;
-       printf("size has been updated to %d\n", heap->size);
+  
        int newIndex = heap->size;
        heap->arr[newIndex].priority = priority;
-       printf("New heapnode assigned prioirty: %d\n", priority);
+
        heap->arr[newIndex].id = id;
 
        heap->indexMap[id] = newIndex;
        bubbleUp(heap,newIndex);
-       printf("Bubble up finished\n");
 }
 
 /* Returns priority of the node with ID 'id' in 'heap'.
  * Precondition: 'id' is a valid node ID in 'heap'.
  */
 int getPriority(MinHeap* heap, int id){
-       int index = heap->indexMap[id];
+       int index = indexOf(heap,id);
        int priority = priorityAt(heap,index);
        return priority;
 }
@@ -308,9 +299,9 @@ int getPriority(MinHeap* heap, int id){
  * Note: this function bubbles up the node until the heap property is restored.
  */
 bool decreasePriority(MinHeap* heap, int id, int newPriority){
-       if (id >=0 && id < heap->size && heap->indexMap[id] != NOTHING){
-              int index = heap->indexMap[id];
-              int priority = priorityAt(heap,index);
+       if (id >=0 && id < heap->capacity && heap->indexMap[id] != NOTHING){
+              int index = indexOf(heap,id);
+              int priority = getPriority(heap,id);
               if (priority > newPriority){
                      heap->arr[index].priority = newPriority;
                      bubbleUp(heap,index);
